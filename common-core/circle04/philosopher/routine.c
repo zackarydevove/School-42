@@ -6,86 +6,77 @@
 /*   By: zdevove <zdevove@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/30 12:42:24 by zdevove           #+#    #+#             */
-/*   Updated: 2023/02/02 12:01:32 by zdevove          ###   ########.fr       */
+/*   Updated: 2023/02/03 10:33:28 by zdevove          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosopher.h"
 
-unsigned long timestamp(unsigned long time, t_philo *philo)
+unsigned int timestamp(void)   // get time in ms
 {
-    unsigned long   start = get_time();
+    struct timeval tv;
+    
+    gettimeofday(&tv, 0);
+    printf("ms: %lu", tv.tv_sec * 1000 + tv.tv_usec / 1000);
+    return (tv.tv_sec * 1000 + (tv.tv_usec / 1000));    // convert sec and usec to ms
+    
+}
+
+void    ft_sleep(unsigned int time_to_x, t_data *data)
+{
+    unsigned long start = timestamp();
     while (!data->stop)
     {
-        if (get_time() - start >= time)
-            break;
+        if (timestamp() - start == time_to_x)    // it means we waited enough time
+            break;                               // so we break and keep reading the code
         usleep(data->nb_philo * 2);
     }
 }
 
 
 
-void    *routine(t_philo philo)
+void    *routine(t_philo *philo)
 {
-    pthread_t   tmp;
-    unsigned long   time;
-
-    time = gettimeoftheday
     if (philo->num % 2 == 0)
-        usleep(philo->data->time_eat / 10);
-    while (!is_dead(philo) && data->max_ate)
+        usleep(philo->data->time_to_eat / 10);
+    while (!is_dead(philo) && philo->data->max_ate)
     {
         printf("pick left fork");
-        pthread_mutex_lock(&data->fork[i], 0);   // lock left fork, if left fork already taken, thread will wait
-        if (compare time)   // if waited to long, die
-        
+        pthread_mutex_lock(&philo->data->fork[philo->num]);   // lock left fork, if left fork already taken, thread will wait
         printf("pick right fork");
-        pthread_mutex_lock(&data->fork[(i + 1) % i], 0); // lock right spoon
-        if (compare time)   // if waited to long, die
-
-        pthread_mutex_lock(&data->meal);
+        pthread_mutex_lock(&philo->data->fork[(philo->num + 1) % philo->num]); // lock right fork
         printf("philosopher is eating");
-        usleep time to eat  // philo is eating
-        
-        
-        philo->ate_time++;
-        pthread_mutex_unlock(&data->meal);
-        pthread_mutex_unlock(&data->fork[i], 0) // unlock left fork
-        pthread_mutex_unlock(&data->fork[(i + 1) % i]) // unlock right fork
-        printf("philosopher finish eating")
-        
-        printf("philosopher is thinking")
-        usleep time to sleep // philo is sleeping
-        // stop
+        pthread_mutex_lock(&philo->data->meal);
+        philo->last_time_he_eat = timestamp();  // get time of the last time he eat
+        ft_sleep(philo->data->time_to_eat, philo->data);  // philo is eating time to eat
+        philo->eat_time++;
+        pthread_mutex_unlock(&philo->data->meal);  // unlock meal
+        pthread_mutex_unlock(&philo->data->fork[philo->num]); // unlock left fork
+        pthread_mutex_unlock(&philo->data->fork[(philo->num + 1) % philo->num]); // unlock right fork
+        printf("philosopher finish eating");
+        printf("philosopher is sleeping");
+        ft_sleep(philo->data->time_to_sleep, philo->data);  // philo is sleeping time to sleep
+        printf("philosopher is thinking"); // philo is thinking
     }
     return (0);
 }
 
-int is_eating()
+  
+
+
+int is_dead(t_philo *philo)
 {
-       
-}
+    int i;
 
-    // printf("%d %d has taken a fork\n")
-    // if // didnt eat for ttd ms, then die
-    // printf("%d %d is eating\n")
-    // printf("%d %d is sleeping\n")
-    // printf("%d %d is thinking\n")
-    
-
-
-int is_dead(t_philo *philo, int nb)
-{
-    pthread_mutex_lock(&philo->data->dead)
-    if (nb)
-        philo->data->stop = 1;
-    if (philo->data->stop)
-        return (pthread_mutex_unlock(&philo->data->dead), 1);
-    return (pthread_mutex_unlock(&philo->data->dead), 0);
-    
-}
-
-void    *check_death(t_philo philo)
-{
-    
+    i = -1;
+    while (++i < (int)philo->data->nb_philo)
+    {
+        if (timestamp() - philo->last_time_he_eat >= philo->data->time_to_die)
+        {
+            printf("philo is dead");
+            philo->data->stop = 1;
+            return (0);
+        }
+    }
+    return (1);
 }

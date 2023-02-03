@@ -6,7 +6,7 @@
 /*   By: zdevove <zdevove@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/27 17:00:58 by zdevove           #+#    #+#             */
-/*   Updated: 2023/02/02 12:01:42 by zdevove          ###   ########.fr       */
+/*   Updated: 2023/02/03 10:33:36 by zdevove          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,29 +18,46 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/time.h>
+
+typedef struct s_data t_data;
 
 typedef struct  s_philo {
     pthread_t pthread;
     int num;
-    int ate_time;
+    int eat_time;
+    unsigned long last_time_he_eat;
     t_data *data;
 }               t_philo;
 
 typedef struct s_data {
     t_philo  *philo;
     pthread_mutex_t *fork;
-    int nb_philo;   // nb de philosopher
-    int time_to_die;    // time to die
-    int time_to_eat;    // time to eat
-    int time_to_sleep;    // time to sleep
-    int nb_must_eat;   // nb of time each philo must eat (optionnal)
-    int philo_eat;
+    pthread_mutex_t meal;
+    unsigned int nb_philo;   // nb de philosopher
+    unsigned int time_to_die;    // time to die
+    unsigned int time_to_eat;    // time to eat
+    unsigned int time_to_sleep;    // time to sleep
+    unsigned int nb_must_eat;   // nb of time each philo must eat (optionnal)
+    unsigned int max_ate;
     int stop;
-    int dead;
 }               t_data;
 
 
+int check_av(char **av);
+int data_init(t_data *data, char **av);
+int mutex_init(t_data *data);
+int philo_init(t_data *data);
+
+void    *routine(t_philo *philo);
+void    ft_sleep(unsigned int time_to_x, t_data *data);
+
+int is_dead(t_philo *philo);
+unsigned int timestamp(void);
 int	ft_atoi(const char *str);
 
-#endif
+void    free_all(t_data *data);
 
+
+
+#endif
