@@ -34,12 +34,14 @@ typedef struct s_data {
     t_philo  *philo;
     pthread_mutex_t *fork;
     pthread_mutex_t meal;
+    pthread_mutex_t writing;
     unsigned int nb_philo;   // nb de philosopher
     unsigned int time_to_die;    // time to die
     unsigned int time_to_eat;    // time to eat
     unsigned int time_to_sleep;    // time to sleep
     unsigned int nb_must_eat;   // nb of time each philo must eat (optionnal)
     unsigned int max_ate;
+    unsigned int start_time;
     int stop;
 }               t_data;
 
@@ -49,7 +51,7 @@ int data_init(t_data *data, char **av);
 int mutex_init(t_data *data);
 int philo_init(t_data *data);
 
-void    *routine(t_philo *philo);
+void    *routine(void *params);
 void    ft_sleep(unsigned int time_to_x, t_data *data);
 
 int is_dead(t_philo *philo);

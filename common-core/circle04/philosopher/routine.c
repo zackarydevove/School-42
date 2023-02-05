@@ -33,30 +33,45 @@ void    ft_sleep(unsigned int time_to_x, t_data *data)
     }
 }
 
-
-
-void    *routine(t_philo *philo)
+void	philo_print(char *msg, t_philo *philo, int unlock)
 {
+	unsigned int	time;
+
+	time = timestamp() - philo->data->start_time;
+	pthread_mutex_lock(&philo->data->writing);
+	if (!philo->data->stop && !philo->data->max_ate)
+		printf("%d %d %s\n", time, philo->num, msg);
+	if (unlock)
+		pthread_mutex_unlock(&philo->data->writing);
+}
+
+void    *routine(void *params)
+{
+    t_philo *philo;
+
+    philo = (t_philo *)params;
     if (philo->num % 2 == 0)
         usleep(philo->data->time_to_eat / 10);
-    while (!is_dead(philo) && philo->data->max_ate)
+    while (!philo->data->stop && philo->data->max_ate)
     {
-        printf("pick left fork");
+        philo_print("has taken a fork", philo, 1);
         pthread_mutex_lock(&philo->data->fork[philo->num]);   // lock left fork, if left fork already taken, thread will wait
-        printf("pick right fork");
+        philo_print("has taken a fork", philo, 1);
         pthread_mutex_lock(&philo->data->fork[(philo->num + 1) % philo->num]); // lock right fork
-        printf("philosopher is eating");
+        philo_print("is eating", philo, 1);
         pthread_mutex_lock(&philo->data->meal);
+
         philo->last_time_he_eat = timestamp();  // get time of the last time he eat
         ft_sleep(philo->data->time_to_eat, philo->data);  // philo is eating time to eat
         philo->eat_time++;
+
         pthread_mutex_unlock(&philo->data->meal);  // unlock meal
         pthread_mutex_unlock(&philo->data->fork[philo->num]); // unlock left fork
         pthread_mutex_unlock(&philo->data->fork[(philo->num + 1) % philo->num]); // unlock right fork
-        printf("philosopher finish eating");
-        printf("philosopher is sleeping");
-        ft_sleep(philo->data->time_to_sleep, philo->data);  // philo is sleeping time to sleep
-        printf("philosopher is thinking"); // philo is thinking
+
+        philo_print("is sleeping", philo, 1);
+		ft_sleep(philo->data->time_to_sleep, philo->data);  // philo is sleeping time to sleep
+		philo_print("is thinking", philo, 1);
     }
     return (0);
 }
@@ -68,15 +83,27 @@ int is_dead(t_philo *philo)
 {
     int i;
 
-    i = -1;
-    while (++i < (int)philo->data->nb_philo)
+    while (!philo->data->max_ate)
     {
-        if (timestamp() - philo->last_time_he_eat >= philo->data->time_to_die)
+        i = -1;
+        while (++i < (int)philo->data->nb_philo)
         {
-            printf("philo is dead");
-            philo->data->stop = 1;
-            return (0);
+            pthread_mutex_lock(&philo->data->meal);
+            if (timestamp() - philo->last_time_he_eat >= philo->data->time_to_die)
+            {
+                philo_print("died", &philo[i], 0);
+                philo->data->stop = 1;
+                return (0);
+            }
+            pthread_mutex_unlock(&philo->data->meal);
         }
+        if (philo->data->stop)
+            return (0);
+        i = 0;
+        while (philo->data->nb_must_eat && i < (int)philo->data->nb_philo
+            && philo[i].eat_time >= (int)philo->data->nb_must_eat)
+            i++;
+        philo->data->max_ate = (i == (int)philo->data->nb_philo);
     }
     return (1);
 }

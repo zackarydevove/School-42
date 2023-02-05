@@ -36,10 +36,12 @@ int main(int ac, char **av)
         if (!data)
             return (0);
         if (!data_init(data, av))
-            return (0);
+            return (printf("Error\nData_init error\n"), 0);
         if (!philo_init(data))
-            return (free_all(data), 0);
+            return (free_all(data), printf("Error\nPhilo_init error\n"), 0);
         free_all(data);
     }
+    else
+        printf("Error\nNeed 4 or 5 arguments\n");
     return (0);
 }
