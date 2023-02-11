@@ -49,6 +49,7 @@ int data_init(t_data *data, char **av) // init data info
     else
         data->nb_must_eat = 0;
     data->max_ate = 0;
+    data->stop = 0;
     return (mutex_init(data));
 }
 
@@ -61,7 +62,7 @@ int mutex_init(t_data *data) // create mutex fork
     data->fork = malloc(data->nb_philo * sizeof(pthread_mutex_t));
     if (!data->fork)
         return (free(data->philo), 0);
-    while (++i < (int)data->nb_philo)
+    while (i < (int)data->nb_philo)
     {
         if (pthread_mutex_init(&(data->fork[i]), 0))
             return (free_all(data), 0);
@@ -94,8 +95,14 @@ int philo_init(t_data *data)
     }
     is_dead(data->philo);
     pthread_mutex_unlock(&data->writing);
-    i = -1;
-    while (++i < (int)data->nb_philo)    // join thread
-        pthread_join(data->philo[i].pthread, 0);
+
+    if (data->nb_philo == 1)
+        pthread_detach(data->philo[0].pthread);
+    else
+    {
+        i = -1;
+        while (++i < (int)data->nb_philo)    // join thread
+            pthread_join(data->philo[i].pthread, 0);
+    }
     return (1);
 }
