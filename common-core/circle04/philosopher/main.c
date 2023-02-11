@@ -16,9 +16,9 @@ void    free_all(t_data *data)
 {
     int i;
 
-    i = data->nb_philo + 1;
-    while (i--)
-        pthread_mutex_destroy(&data->fork[i - 1]);
+    i = -1;
+    while (++i < (int)data->nb_philo)
+        pthread_mutex_destroy(&data->fork[i]);
     free(data->philo);
     free(data->fork);
     free(data);   

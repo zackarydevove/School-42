@@ -27,6 +27,8 @@ typedef struct  s_philo {
     int num;
     int eat_time;
     unsigned long last_time_he_eat;
+    int lfork;
+    int rfork;
     t_data *data;
 }               t_philo;
 
@@ -52,7 +54,7 @@ int mutex_init(t_data *data);
 int philo_init(t_data *data);
 
 void    *routine(void *params);
-void    ft_sleep(unsigned int time_to_x, t_data *data);
+void    ft_sleep(unsigned long time_to_x, t_data *data);
 
 int is_dead(t_philo *philo);
 unsigned int timestamp(void);
